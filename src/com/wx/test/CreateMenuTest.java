@@ -93,7 +93,7 @@ public class CreateMenuTest {
 		vb1.setUrl("http://123456iloveyoulong.com/");
 		
 		ViewButton vb2 = new ViewButton();
-		vb2.setName("八百方测试");
+		vb2.setName("ee测试");
 		vb2.setType("view");
 		vb2.setUrl("http://aj1wf.free.natapp.cc/shop/m/carAds/carAds.html");
 		
