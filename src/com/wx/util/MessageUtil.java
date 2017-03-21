@@ -5,10 +5,12 @@ import java.io.Writer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
 
 import javax.servlet.http.HttpServletRequest;
 
 import org.dom4j.Document;
+import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
 
@@ -92,6 +94,20 @@ public class MessageUtil {
 		input = null;
 		return map;
 	}
+	
+	public static Map<String, String> parseXml(String rxml) throws Exception {
+		// 解析结果存储map
+		Map<String, String> map = new HashMap<String, String>();
+
+		Document document = DocumentHelper.parseText(rxml);
+		Element root = document.getRootElement();
+		List<Element> elements = root.elements();
+		// 把所有xml节点放入map
+		for (Element e : elements) {
+			map.put(e.getName(), e.getText());
+		}
+		return map;
+	}
 
 	// 扩展xstram 使其支持cdata
 	private static XStream xstream = new XStream(new XppDriver() {
@@ -116,11 +132,11 @@ public class MessageUtil {
 			};
 		}
 	});
-
+	
 	/**
-	 * 
-	 * @Title: messageToxml @Description: 对象转换为xml @return String 返回类型
-	 *         xml @throws
+	 *  @Title: messageToxml
+	 *  @Description: 对象转换为xml 
+	 *  @return String 返回类型 xml
 	 */
 	public static String messageToxml(Object obj) {
 		xstream.alias("xml", obj.getClass());
@@ -131,5 +147,18 @@ public class MessageUtil {
 		xstream.alias("xml", s.getClass());
 		xstream.alias("item", new Article().getClass());
 		return xstream.toXML(s);
+	}
+	
+	public static String mapToXml(Map<Object, Object> map) {
+		StringBuffer sb =new StringBuffer();
+		sb.append("<xml>");
+		if(map!=null && map.size()>0){
+			for(Map.Entry<Object, Object> entry : map.entrySet()){
+				sb.append("<"+entry.getKey()+"><![CDATA["+entry.getValue()+"]]></"+entry.getKey()+">");
+			}
+		}
+		sb.append("</xml>");
+		return sb.toString();
+		
 	}
 }

@@ -42,6 +42,7 @@ public class JSSDKUtil {
 	@Test
 	public void test() {
 		String accessToken = CommonUtil.getToken(CommonUtil.appid, CommonUtil.appsecret).getAccessToKen();
+		System.out.println(accessToken);
 		JsApiTicket jsTicket = getJsapiTicket(accessToken);
 		System.out.println(jsTicket.getTicket());
 

@@ -12,5 +12,8 @@
 	<br /> openId:${userInfo.openId}
 	<br /> 用户名:${userInfo.nickname}
 	<br /> 来自:${userInfo.country }${userInfo.province}${userInfo.city }
+	
+	微信支付二维码
+	<img alt="" src="${dataUrl }">
 </body>
 </html>

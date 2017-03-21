@@ -1,12 +1,15 @@
 package com.wx.util;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.ConnectException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.security.SecureRandom;
 
@@ -35,9 +38,11 @@ public class CommonUtil {
 	private static Logger log = LoggerFactory.getLogger(CommonUtil.class);
 	// WX access_token
 	public final static String token_url = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=APPID&secret=APPSECRET";
-	public final static String appid = "wx4057676eb20bc7c8";
-	public final static String appsecret = "421a3bb746b724674030ff058a226cda";
-
+	public final static String appid = "wx7179cc98fb47eff5";
+	public final static String appsecret = "823ae7209cb695d4a4a0c71071d6006e";
+	private final static int CONNECT_TIMEOUT = 5000; // in milliseconds
+    private final static String DEFAULT_ENCODING = "UTF-8";
+	
 	/**
 	 * 通用发送https请求
 	 * 
@@ -92,6 +97,44 @@ public class CommonUtil {
 		}
 
 		return jsonObject;
+	}
+	
+	
+	public static String postData(String urlStr, String data, String contentType){
+		BufferedReader reader = null;
+        try {
+            URL url = new URL(urlStr);
+            URLConnection conn = url.openConnection();
+            conn.setDoOutput(true);
+            conn.setConnectTimeout(CONNECT_TIMEOUT);
+            conn.setReadTimeout(CONNECT_TIMEOUT);
+            if(contentType != null)
+                conn.setRequestProperty("content-type", contentType);
+            OutputStreamWriter writer = new OutputStreamWriter(conn.getOutputStream(), DEFAULT_ENCODING);
+            if(data == null)
+                data = "";
+            writer.write(data); 
+            writer.flush();
+            writer.close();  
+
+            reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), DEFAULT_ENCODING));
+            StringBuilder sb = new StringBuilder();
+            String line = null;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line);
+                sb.append("\r\n");
+            }
+            return sb.toString();
+        } catch (IOException e) {
+            log.error("Error connecting to " + urlStr + ": " + e.getMessage());
+        } finally {
+            try {
+                if (reader != null)
+                    reader.close();
+            } catch (IOException e) {
+            }
+        }
+        return null;
 	}
 
 	/**

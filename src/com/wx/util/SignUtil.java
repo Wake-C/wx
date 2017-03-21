@@ -6,24 +6,23 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Formatter;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
+import java.util.SortedMap;
 import java.util.UUID;
 
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Maps;
-
 /**
  * 微信验证签名工具类
- * 
- * @author Administrator
- *
+ * @author chim
+ * @date  2017年3月16日 16:26:38
  */
 public class SignUtil {
 	private static Logger log = LoggerFactory.getLogger(SignUtil.class);
-	private static String token = "Roy";
+	private static String token = "River";
 	private final static char[] Digit = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E',
 			'F' };
 
@@ -69,6 +68,35 @@ public class SignUtil {
 		String s = new String(tempArr);
 		return s;
 	}
+	/**
+	 * MD5 十六进制加密
+	 * @param origin
+	 * @param charsetname
+	 * @return
+	 */
+	 public static String MD5Encode(String origin, String charsetname) {  
+	        String resultString = null;  
+	        try {  
+	            resultString = new String(origin);  
+	            MessageDigest md = MessageDigest.getInstance("MD5");  
+	            if (charsetname == null || "".equals(charsetname))  
+	                resultString = byteArrayToHexString(md.digest(resultString  
+	                        .getBytes()));  
+	            else  
+	                resultString = byteArrayToHexString(md.digest(resultString  
+	                        .getBytes(charsetname)));  
+	        } catch (Exception exception) {  
+	        }  
+	        return resultString;  
+	    }  
+	 
+	 private static String byteArrayToHexString(byte b[]) {  
+	        StringBuffer resultSb = new StringBuffer();  
+	        for (int i = 0; i < b.length; i++)  
+	            resultSb.append(byteToHexStr(b[i]));  
+	  
+	        return resultSb.toString();  
+	    }
 
 	/**
 	 * 生成一个js接口调用加密签名
@@ -119,11 +147,49 @@ public class SignUtil {
 		return result;
 	}
 
-	private static String create_nonce_str() {
-		return UUID.randomUUID().toString();
+	public static String create_nonce_str() {
+		return UUID.randomUUID().toString().replaceAll("-", "");
 	}
 
-	private static String create_timestamp() {
+	public static String create_timestamp() {
 		return Long.toString(System.currentTimeMillis() / 1000);
+	}
+	/**
+	 * 微信sign和本地加密对比
+	 * @param sort 
+	 * @param api_key  支付密钥
+	 */
+	public static boolean isWxSign(SortedMap<String, String> sort,String api_key) {
+		StringBuffer sb =new StringBuffer();
+		for(Map.Entry<String, String> entry : sort.entrySet()){
+			String key  =entry.getKey();
+			String value=entry.getValue();
+			if(!"sign".equals(key) && value !=null && !"".equals(value) ){
+				sb.append(key+"="+value+"&");
+			}
+		}
+		sb.append("key="+api_key);
+		return sort.get("sign").equals(MD5Encode(sb.toString(), "UTF-8"));
+	}
+	
+	/**
+	 * 微信支付sign
+	 * @param characterEncoding
+	 * @param sortMap
+	 * @param API_KEY 支付密钥
+	 * @return
+	 */
+	public static String createSign(String characterEncoding, SortedMap<Object, Object> sortMap, String API_KEY) {
+		StringBuffer sb = new StringBuffer();
+		for(Map.Entry<Object, Object> entry :sortMap.entrySet()){
+			String k = (String) entry.getKey();
+			String v = (String) entry.getValue();
+			if (null != v && !"".equals(v) && !"sign".equals(k) && !"key".equals(k)) {
+				sb.append(k + "=" + v + "&");
+			}
+		}
+		sb.append("key=" + API_KEY);
+		String sign = SignUtil.MD5Encode(sb.toString(), characterEncoding).toUpperCase();
+		return sign;
 	}
 }
